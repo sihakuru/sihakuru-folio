@@ -31,7 +31,7 @@ window.REELS = [
     category: "Restaurant"
   },
   {
-    link: "https://youtube.com/shorts/UHN3ybZ0UZk",
+    link: "https://drive.google.com/file/d/1_dPv3WcKR4y9yjo9yYScHMppnPcUQ5ih/view?usp=sharing",
     title: "AWD Furniture — Promo Reel",
     client: "AWD Furniture",
     category: "Promo"
