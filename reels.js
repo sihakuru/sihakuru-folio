@@ -43,7 +43,7 @@ window.REELS = [
     category: "Restaurant"
   },
   {
-    link: "https://youtube.com/shorts/fBDm89wdBJ4",
+    link: "https://drive.google.com/file/d/1GfxYAFs4R0oPFprssvfCCC34oDi-II8U/view?usp=sharing",
     title: "World Vision — Lifestyle Short 01",
     client: "World Vision",
     category: "Brand"
