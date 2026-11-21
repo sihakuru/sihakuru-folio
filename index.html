@@ -102,7 +102,9 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
 .viewer[hidden]{display:none}
 .stage{display:flex;flex-direction:column;gap:14px;height:min(88vh,880px);height:min(88dvh,880px);aspect-ratio:9/17.2;max-width:100%;animation:pop .4s var(--ease) both}
 .frame{position:relative;flex:1;border-radius:22px;overflow:hidden;background:#000}
-.player,.player iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player,.player iframe,.player video{position:absolute;inset:0;width:100%;height:100%;border:0}
+.player video{object-fit:cover;background:#000}
+.viewer.embed .frame-info{display:none}
 .segs{position:absolute;left:12px;right:12px;top:12px;display:flex;gap:4px;z-index:3}
 .seg{flex:1;height:3px;border-radius:3px;background:rgba(245,241,236,.3);overflow:hidden}
 .seg i{display:block;height:100%;width:0;background:var(--paper)}
@@ -129,7 +131,7 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
 .stage-foot a{text-decoration:none;font-weight:500}
 .nav-btn{width:56px;height:56px;flex:none;border-radius:50%;border:1px solid rgba(245,241,236,.25);background:rgba(245,241,236,.06);color:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s ease}
 .nav-btn:hover{background:rgba(245,241,236,.18)}
-@media (max-width:640px){.viewer{padding:0;gap:0}.nav-btn.side{display:none}.stage{height:100%;height:100dvh;aspect-ratio:auto;width:100%;gap:0}.frame{border-radius:0}.stage-foot{position:absolute;left:16px;right:16px;bottom:max(10px,env(safe-area-inset-bottom));z-index:5}.frame-info{padding-bottom:46px}}
+@media (max-width:640px){.viewer.embed .stage-foot{position:static;padding:12px 16px max(12px,env(safe-area-inset-bottom));background:#000}.viewer{padding:0;gap:0}.nav-btn.side{display:none}.stage{height:100%;height:100dvh;aspect-ratio:auto;width:100%;gap:0}.frame{border-radius:0}.stage-foot{position:absolute;left:16px;right:16px;bottom:max(10px,env(safe-area-inset-bottom));z-index:5}.frame-info{padding-bottom:46px}}
 
 /* motion */
 @keyframes fill{from{width:0}to{width:100%}}
@@ -375,6 +377,13 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
   var lastFocus = null;
   var player = null, apiReady = false, apiFailed = false, rafId = 0;
   var wantSound = false, isPaused = false;
+  var vid = null; // native <video> used for Google Drive reels
+
+  function destroyVid() {
+    if (!vid) return;
+    try { vid.pause(); vid.removeAttribute('src'); vid.load(); } catch (e) {}
+    vid = null;
+  }
 
   function loadApi() {
     if (window.YT && window.YT.Player) { apiReady = true; return; }
@@ -440,6 +449,53 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
     host.appendChild(f);
   }
 
+  function mountDrive(r) {
+    var host = document.getElementById('player');
+    host.innerHTML = '';
+    var v = document.createElement('video');
+    v.setAttribute('playsinline', '');
+    v.setAttribute('webkit-playsinline', '');
+    v.playsInline = true;
+    v.preload = 'auto';
+    v.muted = !wantSound;
+    v.autoplay = true;
+    v.poster = 'https://drive.google.com/thumbnail?id=' + r.id + '&sz=w1080';
+    v.src = 'https://drive.usercontent.google.com/download?id=' + r.id + '&export=download';
+    var done = false;
+    function fallback() {
+      if (done || vid !== v) return;
+      done = true;
+      destroyVid();
+      driveEmbed(r);
+    }
+    v.addEventListener('error', fallback);
+    v.addEventListener('ended', function () { if (vid === v) step(1, true); });
+    // If the file never starts loading (e.g. Drive blocks it), use Drive's player instead.
+    var guard = setTimeout(function () { if (vid === v && v.readyState === 0) fallback(); }, 10000);
+    v.addEventListener('loadedmetadata', function () { clearTimeout(guard); });
+    host.appendChild(v);
+    vid = v;
+    var p = v.play();
+    if (p && p.catch) p.catch(function () {
+      if (vid !== v) return;
+      // Browser blocked autoplay with sound: start muted instead.
+      v.muted = true; wantSound = false; setSoundIcon();
+      v.play().catch(function () { if (vid === v) { isPaused = true; pausedBadge.hidden = false; } });
+    });
+    tick();
+  }
+
+  // Last resort: Drive's own embedded player. Hide our bottom overlay so it
+  // doesn't sit on top of Drive's controls.
+  function driveEmbed(r) {
+    viewer.classList.add('embed');
+    plainFrame('https://drive.google.com/file/d/' + r.id + '/preview', r.title);
+    soundBtn.hidden = true;
+    tapMid.style.display = 'none';
+    var bar = segsEl.children[state.index];
+    if (bar && bar.firstChild) bar.firstChild.style.width = '100%';
+  }
+
   function mountPlayer() {
     var r = current();
     var host = document.getElementById('player');
@@ -448,14 +504,14 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
     pausedBadge.hidden = true;
     resetChrome();
 
-    // Google Drive video: Drive's own player (tap its play button).
+    destroyVid();
+    viewer.classList.remove('embed');
+
+    // Google Drive video: play the file directly in our own player
+    // (autoplays, uses our progress bar, sound and tap controls).
     if (r.type === 'drive') {
       destroyYT();
-      plainFrame('https://drive.google.com/file/d/' + r.id + '/preview', r.title);
-      soundBtn.hidden = true;
-      tapMid.style.display = 'none';
-      var bar = segsEl.children[state.index];
-      if (bar && bar.firstChild) bar.firstChild.style.width = '100%';
+      mountDrive(r);
       return;
     }
 
@@ -495,8 +551,10 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
     var bar = segsEl.children[state.index];
     var fillEl = bar && bar.firstChild;
     function frame() {
-      if (player && player.getDuration && fillEl) {
-        var d = player.getDuration() || 0, t = player.getCurrentTime() || 0;
+      var d = 0, t = 0, has = false;
+      if (vid) { d = vid.duration || 0; t = vid.currentTime || 0; has = true; }
+      else if (player && player.getDuration) { d = player.getDuration() || 0; t = player.getCurrentTime() || 0; has = true; }
+      if (has && fillEl) {
         fillEl.style.width = d ? Math.min(100, (t / d) * 100) + '%' : '0%';
       }
       rafId = requestAnimationFrame(frame);
@@ -523,6 +581,8 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
   function closeViewer() {
     cancelAnimationFrame(rafId);
     destroyYT();
+    destroyVid();
+    viewer.classList.remove('embed');
     document.getElementById('player').innerHTML = '';
     viewer.hidden = true;
     state.index = -1;
@@ -543,6 +603,12 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
   }
 
   function toggle() {
+    if (vid) {
+      if (vid.paused) { vid.play().catch(function () {}); isPaused = false; }
+      else { vid.pause(); isPaused = true; }
+      pausedBadge.hidden = !isPaused;
+      return;
+    }
     if (!player || !player.getPlayerState || current().type !== 'yt') return;
     if (player.getPlayerState() === YT.PlayerState.PLAYING) {
       player.pauseVideo(); isPaused = true;
@@ -554,6 +620,7 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
 
   function toggleSound() {
     wantSound = !wantSound;
+    if (vid) { vid.muted = !wantSound; if (vid.paused && !isPaused) vid.play().catch(function () {}); }
     if (player && player.unMute) { if (wantSound) { player.unMute(); player.setVolume(100); } else player.mute(); }
     setSoundIcon();
   }
