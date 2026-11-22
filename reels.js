@@ -110,10 +110,11 @@ window.REELS = [
     category: "Restaurant"
   },
   {
-    link: "https://drive.google.com/file/d/1GfxYAFs4R0oPFprssvfCCC34oDi-II8U/view?usp=sharing",
+    link: "media/world-vision-community-01.mp4",
     title: "Stories from the Community 01",
     client: "World Vision",
-    category: "Brand"
+    category: "Brand",
+    poster: "media/world-vision-community-01.jpg"
   },
   {
     link: "https://youtube.com/shorts/DexdXfcFhiM",
