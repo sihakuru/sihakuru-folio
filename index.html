@@ -425,7 +425,7 @@ h1 em{font-weight:500;background:var(--grad);-webkit-background-clip:text;backgr
     if (v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); return; }
     startLive(b);
   }
-  var liveIO = (!calm && 'IntersectionObserver' in window) ? new IntersectionObserver(function (es) {
+  var liveIO = ('IntersectionObserver' in window) ? new IntersectionObserver(function (es) {
     es.forEach(function (e) {
       if (!viewer.hidden) return;
       if (e.isIntersecting) resumeLive(e.target); else stopLive(e.target);
