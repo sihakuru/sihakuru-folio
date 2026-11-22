@@ -98,10 +98,11 @@ window.REELS = [
     category: "Restaurant"
   },
   {
-    link: "https://drive.google.com/file/d/1_dPv3WcKR4y9yjo9yYScHMppnPcUQ5ih/view?usp=sharing",
+    link: "media/awd-furniture-promo.mp4",
     title: "Promo Reel",
     client: "AWD Furniture",
-    category: "Promo"
+    category: "Promo",
+    poster: "media/awd-furniture-promo.jpg"
   },
   {
     link: "https://youtube.com/shorts/KrRT4BwM1l0",
