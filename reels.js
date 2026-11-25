@@ -48,6 +48,26 @@ window.REELS = [
     category: "Hotel"
   },
   {
+    link: "media/balapitiya-slow-stay.mp4",
+    title: "A Slow Stay in Balapitiya",
+    client: "Balapitiya Villa",
+    category: "Hotel",
+    poster: "media/balapitiya-slow-stay.jpg"
+  },
+  {
+    link: "https://youtube.com/shorts/9_qnfjcPNRc",
+    title: "Heritage Villa Tour",
+    client: "Villa Pantano",
+    category: "Hotel"
+  },
+  {
+    link: "media/hotel-ambience.mp4",
+    title: "Hotel Ambience",
+    client: "Hotel",
+    category: "Hotel",
+    poster: "media/hotel-ambience.jpg"
+  },
+  {
     link: "media/raaya-denim-collection.mp4",
     title: "Denim Collection",
     client: "Raaya Clothing",
@@ -111,15 +131,14 @@ window.REELS = [
     category: "Restaurant"
   },
   {
-    link: "media/world-vision-community-01.mp4",
-    title: "Stories from the Community 01",
+    link: "https://youtube.com/shorts/fdHTZi5cLY4",
+    title: "The Tailor, Part 1",
     client: "World Vision",
-    category: "Brand",
-    poster: "media/world-vision-community-01.jpg"
+    category: "Brand"
   },
   {
     link: "https://youtube.com/shorts/DexdXfcFhiM",
-    title: "Stories from the Community 02",
+    title: "The Tailor, Part 2",
     client: "World Vision",
     category: "Brand"
   },
