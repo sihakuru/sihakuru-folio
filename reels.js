@@ -50,7 +50,7 @@ window.REELS = [
   {
     link: "media/balapitiya-slow-stay.mp4",
     title: "A Slow Stay in Balapitiya",
-    client: "Balapitiya Villa",
+    client: "Ocean Caves",
     category: "Hotel",
     poster: "media/balapitiya-slow-stay.jpg"
   },
@@ -62,8 +62,8 @@ window.REELS = [
   },
   {
     link: "media/hotel-ambience.mp4",
-    title: "Hotel Ambience",
-    client: "Hotel",
+    title: "Resort Ambience",
+    client: "Serendiva Beach Resort",
     category: "Hotel",
     poster: "media/hotel-ambience.jpg"
   },
